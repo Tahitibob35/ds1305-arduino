@@ -1,0 +1,6 @@
+Arduino library for Dallas Semiconductor DS1305 real time clock
+
+This library provides support for integration of the DS1305 real time clock with Arduino (or equivalent) using the SPI bus.
+
+Everything appears working at this time, although testing is not complete. Full test program and examples will be coming in the near future
+
