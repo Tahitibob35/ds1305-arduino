@@ -15,8 +15,8 @@
  * 				By default all writes will use 24 hour form, if you wish to write clock using 12 hour form
  * 				then use parameterized constructor and select writeHours24 = false
  *
- * 				Current date/time is passed as s_ds1305ts type
- * 				Alarm specifications are passed as s_ds1305alarm type
+ * 				Current date/time is passed as ds1305time type
+ * 				Alarm specifications are passed as ds1305alarm type
  * 				For both types, hours is hours in 24 hour form, hours12 is 12 hour form and ampm is AM/PM
  * 				indicator where AM is represented by (char) 'A' and PM is represented by (char) 'P'
  * 				If ampm indicator is neither 'A' nor 'B' then 12 hour time is considered undefined
@@ -94,7 +94,7 @@ typedef struct {
 	unsigned char day;
 	unsigned char month;
 	unsigned char year;
-} s_ds1305ts;
+} ds1305time;
 
 /* Representation of an alarm */
 typedef struct {
@@ -104,7 +104,7 @@ typedef struct {
 	unsigned char hours12;
 	char ampm;					// 'A' = AM, 'P' = PM, anything else is hours12 undefined
 	unsigned char dow;
-} s_ds1305alarm;
+} ds1305alarm;
 
 class DS1305
 {
@@ -118,12 +118,12 @@ class DS1305
 	void init(unsigned char ce);
 
 	// Primary clock (time/date) operations
-	void setTime(const s_ds1305ts *time);
-	void getTime(s_ds1305ts *time);
+	void setTime(const ds1305time *time);
+	void getTime(ds1305time *time);
 
 	// Alarm management operations
-	void setAlarm(int alarm, const s_ds1305alarm *time);
-	void getAlarm(int alarm, s_ds1305alarm *time);
+	void setAlarm(int alarm, const ds1305alarm *time);
+	void getAlarm(int alarm, ds1305alarm *time);
 	bool getAlarmState(unsigned int alarm);
 	void getAlarmBothState(bool *state1, bool *state2);
 	void clearAlarmState(unsigned int alarm);
@@ -169,12 +169,12 @@ class DS1305
 	bool writeHours24;			// True (default) means time/alarm writes use 24 hour form
 
 	// Encode a time / alarm packet
-	void encodeTimePacket(unsigned char *buf, const s_ds1305ts *time);
-	void encodeAlarmPacket(unsigned char *buf, const s_ds1305alarm *alarm);
+	void encodeTimePacket(unsigned char *buf, const ds1305time *time);
+	void encodeAlarmPacket(unsigned char *buf, const ds1305alarm *alarm);
 
 	// Decode a time / alarm packet
-	void decodeTimePacket(const unsigned char *buf, s_ds1305ts *time);
-	void decodeAlarmPacket(const unsigned char *buf, s_ds1305alarm *alarm);
+	void decodeTimePacket(const unsigned char *buf, ds1305time *time);
+	void decodeAlarmPacket(const unsigned char *buf, ds1305alarm *alarm);
 
 	// Hour parameter management
 	void decodeHourByte(unsigned char hourByte, unsigned char *hour24, unsigned char *hour12, char *ampm);

@@ -10,7 +10,7 @@
  * License		This software is released under the terms of the Mozilla Public License (MPL) version 2.0
  * 				Full details of licensing terms can be found in the "LICENSE" file, distributed with this code
  */
-#include <SPI.h>
+#include <Arduino.h>
 #include "DS1305.h"
 
 // Constructor with the option to set whether or not we use 24 hour based write (default)
@@ -52,7 +52,7 @@ void DS1305::init(unsigned char ce)
 
 // Set the current time
 // Time set uses hours (when writeHours24 = true), hours12/ampm (when writeHours24 = false)
-void DS1305::setTime(const s_ds1305ts *time)
+void DS1305::setTime(const ds1305time *time)
 {
 	unsigned char buf[DS1305_SIZE_DATETIME];
 	encodeTimePacket(buf, time);
@@ -60,10 +60,10 @@ void DS1305::setTime(const s_ds1305ts *time)
 }
 
 // Retrieve current time
-void DS1305::getTime(s_ds1305ts *time)
+void DS1305::getTime(ds1305time *time)
 {
 	unsigned char buf[DS1305_SIZE_DATETIME];
-	memset(time, 0, sizeof(s_ds1305ts));
+	memset(time, 0, sizeof(ds1305time));
 	read(DS1305_DATETIME, buf, DS1305_SIZE_DATETIME);
 	decodeTimePacket(buf, time);
 }
@@ -72,7 +72,7 @@ void DS1305::getTime(s_ds1305ts *time)
 // alarm must be 0 or 1 else nothing is done
 // Time set uses hours (when writeHours24 = true), hours12/ampm (when writeHours24 = false)
 // Set any field (except ampm of course) to DS1305_ANY to indicate that alarm fires on any value in that field
-void DS1305::setAlarm(int alarm, const s_ds1305alarm *time)
+void DS1305::setAlarm(int alarm, const ds1305alarm *time)
 {
 	if (alarm < 2) {
 		unsigned char buf[DS1305_SIZE_ALARM];
@@ -85,9 +85,9 @@ void DS1305::setAlarm(int alarm, const s_ds1305alarm *time)
 // alarm must be 0 or 1 else nothing is done except resetting (zeroing) the response structure
 // Be on the look out for DS1305_ANY in any alarm field (except ampm) to indicate whether the alarm fires on any value
 // in that field
-void DS1305::getAlarm(int alarm, s_ds1305alarm *time)
+void DS1305::getAlarm(int alarm, ds1305alarm *time)
 {
-	memset(time, 0, sizeof(s_ds1305alarm));
+	memset(time, 0, sizeof(ds1305alarm));
 	if (alarm < 2) {
 		unsigned char buf[DS1305_SIZE_ALARM];
 		read(alarm == 0 ? DS1305_ALARM0 : DS1305_ALARM1, buf, DS1305_SIZE_ALARM);
@@ -178,6 +178,7 @@ void DS1305::setAlarmInterruptState(bool joined)
 	} else {
 		cr |= (1 << DS1305_CR_INTCN);
 	}
+	write(DS1305_CR, cr);
 }
 
 // Returns true if both alarms are joined on the first interrupt line
@@ -244,7 +245,7 @@ bool DS1305::getTrickleChargeState(unsigned char *numDiodes, unsigned char *kRes
 // Will return true provided write is valid
 bool DS1305::writeUser(unsigned char addr, const char *buf, int num)
 {
-	if (addr >= DS1305_USER_START && addr < DS1305_USER_END && (addr + num - 1) < DS1305_USER_END) {
+	if (addr >= DS1305_USER_START && addr < DS1305_USER_END && (addr + num - 1) <= DS1305_USER_END) {
 		write(addr, (const unsigned char *) buf, num);
 		return true;
 	} else {
@@ -258,7 +259,7 @@ bool DS1305::writeUser(unsigned char addr, const char *buf, int num)
 bool DS1305::readUser(unsigned char addr, char *buf, int num)
 {
 	memset(buf, 0, num);
-	if (addr >= DS1305_USER_START && addr < DS1305_USER_END && (addr + num - 1) < DS1305_USER_END) {
+	if (addr >= DS1305_USER_START && addr < DS1305_USER_END && (addr + num - 1) <= DS1305_USER_END) {
 		read(addr, (unsigned char *) buf, num);
 		return true;
 	} else {
@@ -299,6 +300,7 @@ void DS1305::setRunState(bool running)
 	} else {
 		cr |= (1 << DS1305_CR_EOSC);
 	}
+	write(DS1305_CR, cr);
 }
 
 // Reads len bytes from register in address into data
@@ -364,7 +366,7 @@ void DS1305::write(unsigned char address, const unsigned char value)
 
 // Encodes a time packet
 // CJB - need to extend 12 hour based encoding
-void DS1305::encodeTimePacket(unsigned char *buf, const s_ds1305ts *time)
+void DS1305::encodeTimePacket(unsigned char *buf, const ds1305time *time)
 {
 	buf[0] = encodeBCD7(time->seconds, 0x7F);
 	buf[1] = encodeBCD7(time->minutes, 0x7F);
@@ -377,7 +379,7 @@ void DS1305::encodeTimePacket(unsigned char *buf, const s_ds1305ts *time)
 
 // Encode an alarm packet
 // CJB - need to extend 12 hour based encoding
-void DS1305::encodeAlarmPacket(unsigned char *buf, const s_ds1305alarm *alarm)
+void DS1305::encodeAlarmPacket(unsigned char *buf, const ds1305alarm *alarm)
 {
 	buf[0] = encodeBCD7(alarm->seconds, 0x7F);
 	buf[1] = encodeBCD7(alarm->minutes, 0x7F);
@@ -386,7 +388,7 @@ void DS1305::encodeAlarmPacket(unsigned char *buf, const s_ds1305alarm *alarm)
 }
 
 // Decode a time response from the DS1305
-void DS1305::decodeTimePacket(const unsigned char *buf, s_ds1305ts *time)
+void DS1305::decodeTimePacket(const unsigned char *buf, ds1305time *time)
 {
 	time->seconds = decodeBCD7(buf[0], 0x7F);
 	time->minutes = decodeBCD7(buf[1], 0x7F);
@@ -398,7 +400,7 @@ void DS1305::decodeTimePacket(const unsigned char *buf, s_ds1305ts *time)
 }
 
 // Decodes an alarm response from the DS1305
-void DS1305::decodeAlarmPacket(const unsigned char *buf, s_ds1305alarm *alarm)
+void DS1305::decodeAlarmPacket(const unsigned char *buf, ds1305alarm *alarm)
 {
 	alarm->seconds = decodeBCD7(buf[0], 0x7F);
 	alarm->minutes = decodeBCD7(buf[1], 0x7F);
