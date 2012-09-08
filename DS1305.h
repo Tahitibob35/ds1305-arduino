@@ -8,32 +8,32 @@
  * Version		1.0
  *
  * License		This software is released under the terms of the Mozilla Public License (MPL) version 2.0
- * 				Full details of licensing terms can be found in the "LICENSE" file, distributed with this code
+ * 			Full details of licensing terms can be found in the "LICENSE" file, distributed with this code
  *
  * Instructions
- * 				Create an instance of the DS1305 class using either constructor.
- * 				By default all writes will use 24 hour form, if you wish to write clock using 12 hour form
- * 				then use parameterized constructor and select writeHours24 = false
+ * 			Create an instance of the DS1305 class using either constructor.
+ * 			By default all writes will use 24 hour form, if you wish to write clock using 12 hour form
+ * 			then use parameterized constructor and select writeHours24 = false
  *
- * 				Current date/time is passed as ds1305time type
- * 				Alarm specifications are passed as ds1305alarm type
- * 				For both types, hours is hours in 24 hour form, hours12 is 12 hour form and ampm is AM/PM
- * 				indicator where AM is represented by (char) 'A' and PM is represented by (char) 'P'
- * 				If ampm indicator is neither 'A' nor 'B' then 12 hour time is considered undefined
- * 				Both 12 hour and 24 hour times are always provided by calls that read the time
- * 				You MUST provide 24 hour time to write time/alarm unless you select writeHours24 = false in which
- * 				case you MUST provide 12 hour time to write time/alarm.
+ *			Current date/time is passed as ds1305time type
+ * 			Alarm specifications are passed as ds1305alarm type
+ * 			For both types, hours is hours in 24 hour form, hours12 is 12 hour form and ampm is AM/PM
+ * 			indicator where AM is represented by (char) 'A' and PM is represented by (char) 'P'
+ * 			If ampm indicator is neither 'A' nor 'B' then 12 hour time is considered undefined
+ * 			Both 12 hour and 24 hour times are always provided by calls that read the time
+ * 			You MUST provide 24 hour time to write time/alarm unless you select writeHours24 = false in which
+ * 			case you MUST provide 12 hour time to write time/alarm.
  *
- *				Supports DS1305 RTC chip connected to SPI bus (MOSI/MISO/SCLK) with chip select on any line
- *				as designated by the init call.
+ *			Supports DS1305 RTC chip connected to SPI bus (MOSI/MISO/SCLK) with chip select on any line
+ *			as designated by the init call.
  *
- *				On init call, the SPI bus is initialized, the clock oscillator is started and the clock
- *				write protect is deactivated.
+ *			On init call, the SPI bus is initialized, the clock oscillator is started and the clock
+ *			write protect is deactivated.
  *
- *				For optimization, values are NOT checked for correctness when being written to the DS1305.
- *				Per specification, writing illogical values will result in undefined behavior.
+ *			For optimization, values are NOT checked for correctness when being written to the DS1305.
+ *			Per specification, writing illogical values will result in undefined behavior.
  *
- *				Full details on the operation and use of each method can be found in DS1305.cpp
+ *			Full details on the operation and use of each method can be found in DS1305.cpp
  */
 #ifndef __DS1305_RTC_
 #define __DS1305_RTC_
@@ -184,7 +184,6 @@ class DS1305
 	unsigned char encodeBCD7(unsigned char value);
 	unsigned char encodeBCD7(unsigned char value, unsigned char mask);
 	unsigned char encodeBCD8(unsigned char value);
-	unsigned char encodeBCD8(unsigned char value, unsigned char mask);
 	unsigned char decodeBCD7(unsigned char value);
 	unsigned char decodeBCD7(unsigned char value, unsigned char mask);
 	unsigned char decodeBCD8(unsigned char value);
