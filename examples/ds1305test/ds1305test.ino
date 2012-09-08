@@ -14,7 +14,7 @@
  *                      This example sketch tests the function of the DS1035 library and is intended for
  *                      code validation purposes.
  *
- *                      Download sketch, open serial monitor and set 115200 baud rate.
+ *                      Download sketch, open serial monitor and set 9600 baud rate.
  *                      Tests will run after reset and all should pass, results are written to the monitor.
  */
 #include <DS1305.h>
@@ -615,7 +615,7 @@ int crtests()
 // Setup routine
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   
   clk12.init(SS);
   clk24.init(SS);
