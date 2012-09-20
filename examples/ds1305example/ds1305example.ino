@@ -1,5 +1,5 @@
 /*
- * File                 ds1305test.ino
+ * File                 ds1305example.ino
  *
  * Synopsis             Example Sketch for DS1305 library
  *
