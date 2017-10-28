@@ -1,3 +1,8 @@
+This is a fork of the library of Chris Bearman (https://github.com/cjbearman/ds1305-arduino).
+Changes :
+- This library uses the standard arduino SPI library
+- It is compatible with ESP866
+
 Arduino library for Dallas Semiconductor DS1305 real time clock
 
 This library provides support for the DS1305 real time clock for the Arduino platform using the SPI bus.
