@@ -12,6 +12,7 @@
  */
 #include <Arduino.h>
 #include "DS1305.h"
+#include <SPI.h>
 
 // Constructor with the option to set whether or not we use 24 hour based write (default)
 // or not
@@ -25,12 +26,18 @@ DS1305::DS1305() : writeHours24(true)
 }
 
 // Must call initialize prior to using any other method in this class (except constructor)
+
 void DS1305::init(unsigned char ce) 
 {
+	SPI.begin( );
+
 	// Initialize SPI Bus
+	#if defined(__AVR__)
 	pinMode(MOSI, OUTPUT);
 	pinMode(MISO, INPUT);
 	pinMode(SCK, OUTPUT);
+	#endif
+	
 	pinMode(SS, OUTPUT);
 
 	// Initialize the chip enable, LOW
@@ -303,35 +310,36 @@ void DS1305::setRunState(bool running)
 	write(DS1305_CR, cr);
 }
 
+
 // Reads len bytes from register in address into data
 void DS1305::read(unsigned char address, unsigned char *data, int len)
 {
-	// Take a backup of SPCR
-	uint8_t spcr = SPCR;
+	#if defined(__AVR__)
+	SPISettings mySetting(20000000, MSBFIRST, SPI_MODE1);
+	#elif defined(ESP8266)
+	SPISettings mySetting(SPI_CLOCK_DIV16, MSBFIRST, SPI_MODE1);
+	#endif
 
-	// Enable SPI as master, clock phase falling edge, CPOL idle low, MSB first, max rate, no interrupt
-	SPCR = (1 << SPE) | (1 << MSTR) | (1 << CPHA);
+	SPI.beginTransaction(mySetting); 
 
 	// Select the DS1305 by raising it's chip enable line
 	digitalWrite(ce, HIGH);
 
 	// Write the address to the SPI bus and wait for SPI write to copmlete
-	SPDR = address;
-	waitSPI();
+	SPI.transfer( address );
 
 	// Write 0x00 to trigger reads
 	for (int i = 0; i < len; i++) {
-		SPDR = 0x00;
-		waitSPI();
-		data[i] = SPDR;
+		data[i] = SPI.transfer( 0x00 );
 	}
 
 	// Deselect the DS1305 by lowering it's chip enable line
 	digitalWrite(ce, LOW);
 
 	// Restore SPCR
-	SPCR = spcr;
+	SPI.endTransaction();
 }
+
 
 // Read a single byte register
 unsigned char DS1305::read(unsigned char address)
@@ -344,30 +352,41 @@ unsigned char DS1305::read(unsigned char address)
 // Write SPI to register "address" with specified data, bursting for the given length
 void DS1305::write(unsigned char address, const unsigned char *data, int len)
 {
-	// Take a backup of SPCR
+	/*// Take a backup of SPCR
 	uint8_t spcr = SPCR;
 
 	// Enable SPI as master, clock phase falling edge, CPOL idle low, MSB first, max rate, no interrupt
-	SPCR = (1 << SPE) | (1 << MSTR) | (1 << CPHA);
+	SPCR = (1 << SPE) | (1 << MSTR) | (1 << CPHA);*/
+
+	#if defined(__AVR__)
+	SPISettings mySetting(20000000, MSBFIRST, SPI_MODE1);
+	#elif defined(ESP8266)
+	SPISettings mySetting(SPI_CLOCK_DIV16, MSBFIRST, SPI_MODE1);
+	#endif
+
+	SPI.beginTransaction(mySetting); 
 
 	// Select the DS1305 by raising it's chip enable line
 	digitalWrite(ce, HIGH);
 
 	// Write the address to the SPI bus (applying wirte offset automatically) and wait for SPI write to copmlete
-	SPDR = address | DS1305_WRITE_OFFSET;
-	waitSPI();
+	//SPDR = address | DS1305_WRITE_OFFSET;
+	//waitSPI();
+	SPI.transfer( address | DS1305_WRITE_OFFSET );
 
 	// Loop through all provided data and write to SPI bus
 	for (int i = 0; i < len; i++) {
-		SPDR = data[i];
-		waitSPI();
+		//SPDR = data[i];
+		//waitSPI();
+		SPI.transfer( data[i] );
 	}
 
 	// Deselect the DS1305 by lowering it's chip enable line
 	digitalWrite(ce, LOW);
 
 	// Restore SPCR
-	SPCR = spcr;
+	//SPCR = spcr;
+	SPI.endTransaction();
 }
 
 // Write a single byte register
@@ -515,9 +534,11 @@ unsigned char DS1305::decodeBCD8(unsigned char value)
 	return ((((value & 0xF0) >> 4) * 10) + (value & 0x0F));
 }
 
+/*
 // Wait for SPI transaction to finish
 void DS1305::waitSPI()
 {
 	while(!(SPSR & (1<<SPIF))) { };
 }
+*/
 

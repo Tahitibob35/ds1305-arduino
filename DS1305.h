@@ -189,7 +189,8 @@ class DS1305
 	unsigned char decodeBCD8(unsigned char value);
 
 	// Wait for SPI operation to finish
-	void waitSPI();
+	//void waitSPI();
+
 };
 
 #endif /* __DS1305_RTC_ */
